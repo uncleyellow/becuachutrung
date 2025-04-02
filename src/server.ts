@@ -5,28 +5,37 @@ import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import cors from "cors";
 
+// Load biến môi trường
 dotenv.config();
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json()); // Hỗ trợ JSON payload trong body request
+app.use(express.json()); // Hỗ trợ JSON payload
+
+// Đọc biến môi trường từ Railway
+const credentialsJson = process.env.GOOGLE_CREDENTIALS;
+const sheetId = process.env.GOOGLE_SHEET_ID;
 
 // Kiểm tra biến môi trường
-if (!process.env.GOOGLE_CREDENTIALS || !process.env.GOOGLE_SHEET_ID) {
-  console.error("❌ Thiếu GOOGLE_CREDENTIALS hoặc GOOGLE_SHEET_ID trong .env");
+if (!credentialsJson) {
+  console.error("LỖI: GOOGLE_CREDENTIALS chưa được thiết lập trong Railway!");
+  process.exit(1);
+}
+if (!sheetId) {
+  console.error("LỖI: GOOGLE_SHEET_ID chưa được thiết lập trong Railway!");
   process.exit(1);
 }
 
-// Cấu hình xác thực Google Sheets
-const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS || "{}");
+// Parse JSON credentials
+const credentials = JSON.parse(credentialsJson);
 
+// Xác thực Google API
 const auth = new google.auth.GoogleAuth({
   credentials,
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
-
 const sheets = google.sheets({ version: "v4", auth });
 
 // Cấu hình Swagger
@@ -38,13 +47,8 @@ const swaggerOptions = {
       version: "1.0.0",
       description: "API để đọc và ghi dữ liệu vào Google Sheets",
     },
-    servers: [
-      {
-        url: process.env.RAILWAY_PUBLIC_URL || `http://localhost:${PORT}`,
-      },
-    ],
   },
-  apis: ["./src/server.ts"], // Chỉ định các file chứa API docs
+  apis: ["./src/server.ts"], // Chỉ định file chứa Swagger Annotations
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -55,40 +59,56 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  * /data:
  *   get:
  *     summary: Lấy dữ liệu từ Google Sheets
+ *     tags:
+ *       - Google Sheets
  *     responses:
  *       200:
  *         description: Dữ liệu lấy thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *       404:
+ *         description: Không tìm thấy dữ liệu
  *       500:
  *         description: Lỗi server
  */
-app.get("/data", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const range = "sum!A5:P8";
+app.get("/data", (req: Request, res: Response) => {
+  const range = "sum!A5:P8";
 
-    const response = await sheets.spreadsheets.values.get({
+  sheets.spreadsheets.values
+    .get({
       spreadsheetId: sheetId,
       range: range,
+    })
+    .then((response) => {
+      const rows = response.data.values;
+      if (!rows) {
+        return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
+      }
+      res.json({ data: rows });
+    })
+    .catch((error) => {
+      console.error("Lỗi khi lấy dữ liệu từ Google Sheets:", error);
+      res.status(500).json({ message: "Lỗi server" });
     });
-
-    const rows = response.data.values;
-    if (!rows) {
-      res.status(404).json({ message: "Không tìm thấy dữ liệu" });
-      return;
-    }
-
-    res.json({ data: rows });
-  } catch (error) {
-    console.error("❌ Lỗi khi lấy dữ liệu từ Google Sheets:", error);
-    res.status(500).json({ message: "Lỗi server", error });
-  }
 });
+
 
 /**
  * @swagger
  * /write:
  *   post:
  *     summary: Ghi dữ liệu vào Google Sheets
+ *     tags:
+ *       - Google Sheets
  *     requestBody:
  *       required: true
  *       content:
@@ -98,15 +118,12 @@ app.get("/data", async (req: Request, res: Response): Promise<void> => {
  *             properties:
  *               rowIndex:
  *                 type: integer
- *                 description: Số hàng cần cập nhật (tối thiểu 6)
+ *                 example: 6
  *               values:
  *                 type: array
  *                 items:
  *                   type: string
- *                 description: Dữ liệu cần ghi
- *             example:
- *               rowIndex: 6
- *               values: ["2025-03-31T12:00", "2025-03-31T14:00", "120 phút"]
+ *                 example: ["2025-03-31T12:00", "2025-03-31T14:00", "120 phút"]
  *     responses:
  *       200:
  *         description: Dữ liệu đã được ghi vào Google Sheets
@@ -115,35 +132,36 @@ app.get("/data", async (req: Request, res: Response): Promise<void> => {
  *       500:
  *         description: Lỗi server
  */
-app.post("/write", async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { rowIndex, values } = req.body;
+app.post("/write", (req: any, res: any) => {
+  const { rowIndex, values } = req.body;
 
-    // Kiểm tra dữ liệu đầu vào
-    if (!rowIndex || !Array.isArray(values) || rowIndex < 6) {
-      res.status(400).json({ message: "Dữ liệu không hợp lệ, rowIndex phải ≥ 6" });
-      return;
-    }
+  if (!values || !Array.isArray(values) || rowIndex < 6) {
+    return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+  }
 
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const range = `sum!E${rowIndex}:G${rowIndex}`; // Ghi vào cột E, F, G
+  const range = `sum!E${rowIndex}:F${rowIndex}`;
 
-    await sheets.spreadsheets.values.update({
+  // Promise .then() và .catch() thay vì async/await
+  sheets.spreadsheets.values
+    .update({
       spreadsheetId: sheetId,
       range: range,
       valueInputOption: "USER_ENTERED",
       requestBody: { values: [values] },
+    })
+    .then(() => {
+      res.json({ message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets` });
+    })
+    .catch((error) => {
+      console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
+      res.status(500).json({ message: "Lỗi server" });
     });
-
-    res.json({ message: `✅ Đã cập nhật hàng ${rowIndex} trong Google Sheets` });
-  } catch (error) {
-    console.error("❌ Lỗi khi ghi dữ liệu vào Google Sheets:", error);
-    res.status(500).json({ message: "Lỗi server", error });
-  }
 });
+
+
 
 // Chạy server
 app.listen(PORT, () => {
-  console.log(`🚀 Server chạy tại: http://localhost:${PORT}`);
-  console.log(`📖 Swagger UI: http://localhost:${PORT}/api-docs`);
+  console.log(`✅ Server chạy tại: http://localhost:${PORT}`);
+  console.log(`📜 Swagger Docs: http://localhost:${PORT}/api-docs`);
 });
