@@ -5,14 +5,15 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies including dev dependencies
+# Install dependencies
 RUN npm install
 
-# Copy source files
+# Copy source code
 COPY . .
 
-# Build the app (compile TypeScript)
-RUN npm run build
+# Fix permissions and build with explicit path to tsc
+RUN chmod +x ./node_modules/.bin/tsc && \
+    ./node_modules/.bin/tsc
 
-# Start the app
-CMD ["npm", "start"]
+# Start the application
+CMD ["node", "dist/server.js"]
