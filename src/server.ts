@@ -15,6 +15,7 @@ app.use(cors());
 app.use(express.json()); // Hỗ trợ JSON payload
 
 try {
+  console.log("Express app initialization started...");
   // Đọc credentials từ biến môi trường
   const credentialsData = {
     type: process.env.GOOGLE_TYPE,

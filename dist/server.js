@@ -17,6 +17,7 @@ const PORT = process.env.PORT || 3000;
 app.use((0, cors_1.default)());
 app.use(express_1.default.json()); // Hỗ trợ JSON payload
 try {
+    console.log("Express app initialization started...");
     // Đọc credentials từ biến môi trường
     const credentialsData = {
         type: process.env.GOOGLE_TYPE,
