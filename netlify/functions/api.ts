@@ -1,10 +1,7 @@
-import { builder } from "@netlify/functions";
+const { handler } = require("@netlify/functions");
 
 // Import ứng dụng Express
-const serverApp = require("../../dist/server");
-
-// Lấy ứng dụng Express thực tế
-const app = serverApp.default || serverApp;
+const app = require("../../dist/server");
 
 // Tạo Netlify Function handler
-exports.handler = builder(app);
+exports.handler = handler(app);

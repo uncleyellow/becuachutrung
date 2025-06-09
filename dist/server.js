@@ -867,4 +867,4 @@ catch (error) {
     console.error("LỖI: Không thể đọc file credential.json:", error);
     process.exit(1);
 }
-exports.default = app;
+module.exports = app;
