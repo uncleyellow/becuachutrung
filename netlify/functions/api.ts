@@ -1,6 +1,7 @@
-import { default as server } from "../../dist/server";
-import serverless from "@netlify/functions";
+import { builder } from "@netlify/functions";
 
-const handler = serverless.handler(server);
+const app = require("../../dist/server");
+
+const handler = builder(app.default || app);
 
 export { handler }; 
