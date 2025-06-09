@@ -4,8 +4,6 @@ import dotenv from "dotenv";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import cors from "cors";
-import fs from 'fs';
-import path from 'path';
 
 // Load biến môi trường
 dotenv.config();
@@ -16,10 +14,42 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json()); // Hỗ trợ JSON payload
 
-// Đọc credentials từ file local
 try {
-  const credentialsPath = path.join(__dirname, '../credential.json');
-  const credentialsData = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+  // Đọc credentials từ biến môi trường
+  const credentialsData = {
+    type: process.env.GOOGLE_TYPE,
+    project_id: process.env.GOOGLE_PROJECT_ID,
+    private_key_id: process.env.GOOGLE_PRIVATE_KEY_ID,
+    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    auth_uri: process.env.GOOGLE_AUTH_URI,
+    token_uri: process.env.GOOGLE_TOKEN_URI,
+    auth_provider_x509_cert_url: process.env.GOOGLE_AUTH_PROVIDER_CERT_URL,
+    client_x509_cert_url: process.env.GOOGLE_CLIENT_CERT_URL,
+    universe_domain: process.env.GOOGLE_UNIVERSE_DOMAIN
+  };
+
+  // Kiểm tra các biến môi trường bắt buộc
+  const requiredEnvVars = [
+    'GOOGLE_TYPE',
+    'GOOGLE_PROJECT_ID',
+    'GOOGLE_PRIVATE_KEY_ID',
+    'GOOGLE_PRIVATE_KEY',
+    'GOOGLE_CLIENT_EMAIL',
+    'GOOGLE_CLIENT_ID',
+    'GOOGLE_AUTH_URI',
+    'GOOGLE_TOKEN_URI',
+    'GOOGLE_AUTH_PROVIDER_CERT_URL',
+    'GOOGLE_CLIENT_CERT_URL',
+    'GOOGLE_UNIVERSE_DOMAIN'
+  ];
+
+  const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  if (missingEnvVars.length > 0) {
+    console.error('LỖI: Thiếu các biến môi trường sau:', missingEnvVars.join(', '));
+    process.exit(1);
+  }
   
   // Xác thực Google API
   const auth = new google.auth.GoogleAuth({
@@ -29,11 +59,11 @@ try {
   const sheets = google.sheets({ version: "v4", auth });
 
   // Thêm sheetId vào đây
-  const sheetId = "1vWGafXoO_vxthkV_iZ8gLqIFbaFO5P8GcBCZeWXLGV4"; // Thay thế bằng ID của Google Sheet của bạn
+  const sheetId = process.env.GOOGLE_SHEET_ID;
 
   // Kiểm tra sheetId
   if (!sheetId) {
-    console.error("LỖI: Vui lòng thêm sheetId vào code!");
+    console.error("LỖI: Vui lòng thêm GOOGLE_SHEET_ID vào biến môi trường!");
     process.exit(1);
   }
 
@@ -908,9 +938,4 @@ try {
   process.exit(1);
 }
 
-
-// Chạy server
-app.listen(PORT, () => {
-  console.log(`✅ Server chạy tại: http://localhost:${PORT}`);
-  console.log(`📜 Swagger Docs: http://localhost:${PORT}/api-docs`);
-});
+export default app;
