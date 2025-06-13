@@ -9,7 +9,7 @@ import cors from "cors";
 dotenv.config();
 
 const app: Application = express();
-const PORT = process.env.PORT || 3000;
+const PORT: number = parseInt(process.env.PORT as string || '3000', 10);
 
 app.use(cors());
 app.use(express.json()); // Hỗ trợ JSON payload
@@ -49,7 +49,6 @@ try {
   const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
   if (missingEnvVars.length > 0) {
     console.error('LỖI: Thiếu các biến môi trường sau:', missingEnvVars.join(', '));
-    process.exit(1);
   }
   
   // Xác thực Google API
@@ -65,7 +64,6 @@ try {
   // Kiểm tra sheetId
   if (!sheetId) {
     console.error("LỖI: Vui lòng thêm GOOGLE_SHEET_ID vào biến môi trường!");
-    process.exit(1);
   }
 
   // Cấu hình Swagger
@@ -936,13 +934,13 @@ try {
 
 } catch (error) {
   console.error("LỖI: Không thể đọc file credential.json:", error);
-  process.exit(1);
 }
 
 module.exports = app;
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`[SERVER STARTUP] Attempting to start server. PORT environment variable: ${process.env.PORT}. Calculated PORT: ${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[SERVER STARTUP] Server is truly running on port ${PORT}`);
   });
 }
