@@ -13,7 +13,7 @@ const cors_1 = __importDefault(require("cors"));
 // Load biến môi trường
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 app.use((0, cors_1.default)());
 app.use(express_1.default.json()); // Hỗ trợ JSON payload
 try {
@@ -49,7 +49,6 @@ try {
     const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
     if (missingEnvVars.length > 0) {
         console.error('LỖI: Thiếu các biến môi trường sau:', missingEnvVars.join(', '));
-        process.exit(1);
     }
     // Xác thực Google API
     const auth = new googleapis_1.google.auth.GoogleAuth({
@@ -62,7 +61,6 @@ try {
     // Kiểm tra sheetId
     if (!sheetId) {
         console.error("LỖI: Vui lòng thêm GOOGLE_SHEET_ID vào biến môi trường!");
-        process.exit(1);
     }
     // Cấu hình Swagger
     const swaggerOptions = {
@@ -865,6 +863,11 @@ try {
 }
 catch (error) {
     console.error("LỖI: Không thể đọc file credential.json:", error);
-    process.exit(1);
 }
 module.exports = app;
+if (require.main === module) {
+    console.log(`[SERVER STARTUP] Attempting to start server. PORT environment variable: ${process.env.PORT}. Calculated PORT: ${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`[SERVER STARTUP] Server is truly running on port ${PORT}`);
+    });
+}
