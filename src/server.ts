@@ -936,11 +936,10 @@ try {
   console.error("LỖI: Không thể đọc file credential.json:", error);
 }
 
-module.exports = app;
+// module.exports = app;
+const port = process.env.PORT || 4000 
+console.log(`[SERVER STARTUP] Attempting to start server. PORT environment variable: ${process.env.PORT}. Calculated PORT: ${PORT}`);
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
 
-if (require.main === module) {
-  console.log(`[SERVER STARTUP] Attempting to start server. PORT environment variable: ${process.env.PORT}. Calculated PORT: ${PORT}`);
-  app.listen(PORT as number, '0.0.0.0', () => {
-    console.log(`[SERVER STARTUP] Server is truly running on port ${PORT}`);
-  });
-}
