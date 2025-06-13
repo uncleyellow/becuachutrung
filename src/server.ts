@@ -9,7 +9,7 @@ import cors from "cors";
 dotenv.config();
 
 const app: Application = express();
-const PORT: number = parseInt(process.env.PORT as string || '3000', 10);
+const PORT: number = Number(process.env.PORT) || 3000;
 
 app.use(cors());
 app.use(express.json()); // Hỗ trợ JSON payload
@@ -940,7 +940,7 @@ module.exports = app;
 
 if (require.main === module) {
   console.log(`[SERVER STARTUP] Attempting to start server. PORT environment variable: ${process.env.PORT}. Calculated PORT: ${PORT}`);
-  app.listen(PORT, '0.0.0.0', () => {
+  app.listen(PORT as number, '0.0.0.0', () => {
     console.log(`[SERVER STARTUP] Server is truly running on port ${PORT}`);
   });
 }
