@@ -14,8 +14,31 @@ const cors_1 = __importDefault(require("cors"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = Number(process.env.PORT) || 3000;
-app.use((0, cors_1.default)());
-app.use(express_1.default.json()); // Hỗ trợ JSON payload
+// Cấu hình CORS chi tiết
+app.use((0, cors_1.default)({
+    origin: '*', // Cho phép tất cả các domain trong môi trường development
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+// Middleware để log request
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    console.log('Request Headers:', req.headers);
+    console.log('Request Body:', req.body);
+    // Log response
+    const originalSend = res.send;
+    res.send = function (body) {
+        console.log(`[${new Date().toISOString()}] Response:`, {
+            statusCode: res.statusCode,
+            body: body
+        });
+        return originalSend.call(this, body);
+    };
+    next();
+});
+app.use(express_1.default.json({ limit: '10mb' })); // Tăng giới hạn kích thước request
+app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
 try {
     console.log("Express app initialization started...");
     // Đọc credentials từ biến môi trường
@@ -153,26 +176,112 @@ try {
      *         description: Lỗi server
      */
     app.post("/trangbom/write", (req, res) => {
-        const { rowIndex, values } = req.body;
-        if (!values || !Array.isArray(values) || rowIndex < 6) {
-            return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+        try {
+            console.log("=== /trangbom/write endpoint called ===");
+            console.log("Full request URL:", req.originalUrl);
+            console.log("Request body:", JSON.stringify(req.body, null, 2));
+            console.log("Sheet ID:", sheetId);
+            const { rowIndex, values } = req.body;
+            if (!rowIndex || !values) {
+                console.log("Missing required fields:", { rowIndex, hasValues: !!values });
+                return res.status(400).json({
+                    message: "Thiếu dữ liệu bắt buộc",
+                    details: { rowIndex, hasValues: !!values }
+                });
+            }
+            if (!Array.isArray(values)) {
+                console.log("Values is not an array:", typeof values);
+                return res.status(400).json({
+                    message: "Values phải là một mảng",
+                    details: { type: typeof values }
+                });
+            }
+            if (rowIndex < 6) {
+                console.log("Invalid rowIndex:", rowIndex);
+                return res.status(400).json({
+                    message: "rowIndex phải >= 6",
+                    details: { rowIndex }
+                });
+            }
+            if (values.length !== 7) {
+                console.log("Invalid values length:", values.length);
+                return res.status(400).json({
+                    message: "Cần đúng 7 giá trị cho các cột B đến H",
+                    details: {
+                        expected: 7,
+                        received: values.length,
+                        values: values
+                    }
+                });
+            }
+            // Tạo range mới
+            const range = `TrangBom!B${rowIndex}:H${rowIndex}`;
+            console.log("=== Update Details ===");
+            console.log("Range being used:", range);
+            console.log("Number of values:", values.length);
+            console.log("Values to be written:", values);
+            // Tạo request body
+            const requestBody = {
+                spreadsheetId: sheetId,
+                range: range,
+                valueInputOption: "USER_ENTERED",
+                requestBody: {
+                    values: [values],
+                    majorDimension: "ROWS"
+                }
+            };
+            console.log("Full update request:", JSON.stringify(requestBody, null, 2));
+            // Thực hiện update
+            sheets.spreadsheets.values
+                .update(requestBody)
+                .then((response) => {
+                console.log("Update successful. Response:", response.data);
+                res.json({
+                    message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets`,
+                    details: {
+                        range: range,
+                        values: values,
+                        response: response.data
+                    }
+                });
+            })
+                .catch((error) => {
+                var _a;
+                console.error("Google Sheets API Error:", {
+                    message: error.message,
+                    code: error.code,
+                    status: error.status,
+                    errors: error.errors,
+                    stack: error.stack,
+                    requestRange: range,
+                    requestValues: values,
+                    requestBody: requestBody
+                });
+                res.status(500).json({
+                    message: "Lỗi khi cập nhật Google Sheets",
+                    details: {
+                        error: error.message,
+                        code: error.code,
+                        status: error.status,
+                        range: range,
+                        valuesCount: values.length,
+                        requestUrl: (_a = error.config) === null || _a === void 0 ? void 0 : _a.url
+                    }
+                });
+            });
         }
-        const range = `TrangBom!E${rowIndex}:F${rowIndex}`;
-        // Promise .then() và .catch() thay vì async/await
-        sheets.spreadsheets.values
-            .update({
-            spreadsheetId: sheetId,
-            range: range,
-            valueInputOption: "USER_ENTERED",
-            requestBody: { values: [values] },
-        })
-            .then(() => {
-            res.json({ message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets` });
-        })
-            .catch((error) => {
-            console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
-            res.status(500).json({ message: "Lỗi server" });
-        });
+        catch (error) {
+            console.error("Unexpected error in /trangbom/write:", {
+                message: error.message,
+                stack: error.stack
+            });
+            res.status(500).json({
+                message: "Lỗi không xác định",
+                details: {
+                    error: error.message
+                }
+            });
+        }
     });
     // Sóng Thần 
     /**
@@ -255,7 +364,7 @@ try {
         if (!values || !Array.isArray(values) || rowIndex < 6) {
             return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
         }
-        const range = `SongThan!E${rowIndex}:F${rowIndex}`;
+        const range = `SongThan!B${rowIndex}:H${rowIndex}`;
         // Promise .then() và .catch() thay vì async/await
         sheets.spreadsheets.values
             .update({
@@ -353,7 +462,7 @@ try {
         if (!values || !Array.isArray(values) || rowIndex < 6) {
             return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
         }
-        const range = `DieuTri!E${rowIndex}:F${rowIndex}`;
+        const range = `DieuTri!B${rowIndex}:H${rowIndex}`;
         // Promise .then() và .catch() thay vì async/await
         sheets.spreadsheets.values
             .update({
@@ -451,7 +560,7 @@ try {
         if (!values || !Array.isArray(values) || rowIndex < 6) {
             return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
         }
-        const range = `DaNang!E${rowIndex}:F${rowIndex}`;
+        const range = `DaNang!B${rowIndex}:H${rowIndex}`;
         // Promise .then() và .catch() thay vì async/await
         sheets.spreadsheets.values
             .update({
@@ -549,7 +658,7 @@ try {
         if (!values || !Array.isArray(values) || rowIndex < 6) {
             return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
         }
-        const range = `KimLien!E${rowIndex}:F${rowIndex}`;
+        const range = `KimLien!B${rowIndex}:H${rowIndex}`;
         // Promise .then() và .catch() thay vì async/await
         sheets.spreadsheets.values
             .update({
@@ -647,7 +756,7 @@ try {
         if (!values || !Array.isArray(values) || rowIndex < 6) {
             return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
         }
-        const range = `DongAnh!E${rowIndex}:F${rowIndex}`;
+        const range = `DongAnh!B${rowIndex}:H${rowIndex}`;
         // Promise .then() và .catch() thay vì async/await
         sheets.spreadsheets.values
             .update({
@@ -745,7 +854,7 @@ try {
         if (!values || !Array.isArray(values) || rowIndex < 6) {
             return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
         }
-        const range = `GiapBat!E${rowIndex}:F${rowIndex}`;
+        const range = `GiapBat!B${rowIndex}:H${rowIndex}`;
         // Promise .then() và .catch() thay vì async/await
         sheets.spreadsheets.values
             .update({
@@ -839,26 +948,107 @@ try {
      *         description: Lỗi server
      */
     app.post("/vinh/write", (req, res) => {
-        const { rowIndex, values } = req.body;
-        if (!values || !Array.isArray(values) || rowIndex < 6) {
-            return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+        try {
+            console.log("=== /vinh/write endpoint called ===");
+            console.log("Full request URL:", req.originalUrl);
+            console.log("Request body:", JSON.stringify(req.body, null, 2));
+            console.log("Sheet ID:", sheetId);
+            const { rowIndex, values } = req.body;
+            if (!rowIndex || !values) {
+                console.log("Missing required fields:", { rowIndex, hasValues: !!values });
+                return res.status(400).json({
+                    message: "Thiếu dữ liệu bắt buộc",
+                    details: { rowIndex, hasValues: !!values }
+                });
+            }
+            if (!Array.isArray(values)) {
+                console.log("Values is not an array:", typeof values);
+                return res.status(400).json({
+                    message: "Values phải là một mảng",
+                    details: { type: typeof values }
+                });
+            }
+            if (rowIndex < 6) {
+                console.log("Invalid rowIndex:", rowIndex);
+                return res.status(400).json({
+                    message: "rowIndex phải >= 6",
+                    details: { rowIndex }
+                });
+            }
+            if (values.length !== 7) {
+                console.log("Invalid values length:", values.length);
+                return res.status(400).json({
+                    message: "Cần đúng 7 giá trị cho các cột B đến H",
+                    details: {
+                        expected: 7,
+                        received: values.length,
+                        values: values
+                    }
+                });
+            }
+            const range = `Vinh!B${rowIndex}:H${rowIndex}`;
+            console.log("=== Update Details ===");
+            console.log("Range being used:", range);
+            console.log("Number of values:", values.length);
+            console.log("Values to be written:", values);
+            console.log("Full update request:", {
+                spreadsheetId: sheetId,
+                range: range,
+                valueInputOption: "USER_ENTERED",
+                requestBody: { values: [values] }
+            });
+            sheets.spreadsheets.values
+                .update({
+                spreadsheetId: sheetId,
+                range: range,
+                valueInputOption: "USER_ENTERED",
+                requestBody: { values: [values] },
+            })
+                .then((response) => {
+                console.log("Update successful. Response:", response.data);
+                res.json({
+                    message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets`,
+                    details: {
+                        range: range,
+                        values: values,
+                        response: response.data
+                    }
+                });
+            })
+                .catch((error) => {
+                console.error("Google Sheets API Error:", {
+                    message: error.message,
+                    code: error.code,
+                    status: error.status,
+                    errors: error.errors,
+                    stack: error.stack,
+                    requestRange: range,
+                    requestValues: values
+                });
+                res.status(500).json({
+                    message: "Lỗi khi cập nhật Google Sheets",
+                    details: {
+                        error: error.message,
+                        code: error.code,
+                        status: error.status,
+                        range: range,
+                        valuesCount: values.length
+                    }
+                });
+            });
         }
-        const range = `Vinh!E${rowIndex}:F${rowIndex}`;
-        // Promise .then() và .catch() thay vì async/await
-        sheets.spreadsheets.values
-            .update({
-            spreadsheetId: sheetId,
-            range: range,
-            valueInputOption: "USER_ENTERED",
-            requestBody: { values: [values] },
-        })
-            .then(() => {
-            res.json({ message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets` });
-        })
-            .catch((error) => {
-            console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
-            res.status(500).json({ message: "Lỗi server" });
-        });
+        catch (error) {
+            console.error("Unexpected error in /vinh/write:", {
+                message: error.message,
+                stack: error.stack
+            });
+            res.status(500).json({
+                message: "Lỗi không xác định",
+                details: {
+                    error: error.message
+                }
+            });
+        }
     });
 }
 catch (error) {
