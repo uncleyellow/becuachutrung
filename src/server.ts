@@ -936,6 +936,7 @@ try {
   app.post("/vinh/write", (req: any, res: any) => {
     try {
         console.log("=== /vinh/write endpoint called ===");
+        console.log("Full request URL:", req.originalUrl);
         console.log("Request body:", JSON.stringify(req.body, null, 2));
         console.log("Sheet ID:", sheetId);
         
@@ -978,7 +979,16 @@ try {
         }
 
         const range = `Vinh!B${rowIndex}:H${rowIndex}`;
-        console.log("Attempting to update range:", range);
+        console.log("=== Update Details ===");
+        console.log("Range being used:", range);
+        console.log("Number of values:", values.length);
+        console.log("Values to be written:", values);
+        console.log("Full update request:", {
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            requestBody: { values: [values] }
+        });
 
         sheets.spreadsheets.values
             .update({
@@ -988,10 +998,14 @@ try {
                 requestBody: { values: [values] },
             })
             .then((response) => {
-                console.log("Update successful:", response.data);
+                console.log("Update successful. Response:", response.data);
                 res.json({ 
                     message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets`,
-                    details: response.data
+                    details: {
+                        range: range,
+                        values: values,
+                        response: response.data
+                    }
                 });
             })
             .catch((error) => {
@@ -1000,14 +1014,18 @@ try {
                     code: error.code,
                     status: error.status,
                     errors: error.errors,
-                    stack: error.stack
+                    stack: error.stack,
+                    requestRange: range,
+                    requestValues: values
                 });
                 res.status(500).json({ 
                     message: "Lỗi khi cập nhật Google Sheets",
                     details: {
                         error: error.message,
                         code: error.code,
-                        status: error.status
+                        status: error.status,
+                        range: range,
+                        valuesCount: values.length
                     }
                 });
             });
