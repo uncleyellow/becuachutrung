@@ -167,7 +167,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `TrangBom!E${rowIndex}:F${rowIndex}`;
+    const range = `TrangBom!B${rowIndex}:H${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -273,7 +273,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `SongThan!E${rowIndex}:F${rowIndex}`;
+    const range = `SongThan!B${rowIndex}:H${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -380,7 +380,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `DieuTri!E${rowIndex}:F${rowIndex}`;
+    const range = `DieuTri!B${rowIndex}:H${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -486,7 +486,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `DaNang!E${rowIndex}:F${rowIndex}`;
+    const range = `DaNang!B${rowIndex}:H${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -593,7 +593,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `KimLien!E${rowIndex}:F${rowIndex}`;
+    const range = `KimLien!B${rowIndex}:H${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -700,7 +700,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `DongAnh!E${rowIndex}:F${rowIndex}`;
+    const range = `DongAnh!B${rowIndex}:H${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -807,7 +807,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `GiapBat!E${rowIndex}:F${rowIndex}`;
+    const range = `GiapBat!B${rowIndex}:H${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -913,7 +913,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `Vinh!E${rowIndex}:F${rowIndex}`;
+    const range = `Vinh!B${rowIndex}:H${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
