@@ -176,112 +176,74 @@ try {
      *         description: Lỗi server
      */
     app.post("/trangbom/write", (req, res) => {
-        try {
-            console.log("=== /trangbom/write endpoint called ===");
-            console.log("Full request URL:", req.originalUrl);
-            console.log("Request body:", JSON.stringify(req.body, null, 2));
-            console.log("Sheet ID:", sheetId);
-            const { rowIndex, values } = req.body;
-            if (!rowIndex || !values) {
-                console.log("Missing required fields:", { rowIndex, hasValues: !!values });
-                return res.status(400).json({
-                    message: "Thiếu dữ liệu bắt buộc",
-                    details: { rowIndex, hasValues: !!values }
-                });
-            }
-            if (!Array.isArray(values)) {
-                console.log("Values is not an array:", typeof values);
-                return res.status(400).json({
-                    message: "Values phải là một mảng",
-                    details: { type: typeof values }
-                });
-            }
-            if (rowIndex < 6) {
-                console.log("Invalid rowIndex:", rowIndex);
-                return res.status(400).json({
-                    message: "rowIndex phải >= 6",
-                    details: { rowIndex }
-                });
-            }
-            if (values.length !== 7) {
-                console.log("Invalid values length:", values.length);
-                return res.status(400).json({
-                    message: "Cần đúng 7 giá trị cho các cột B đến H",
-                    details: {
-                        expected: 7,
-                        received: values.length,
-                        values: values
-                    }
-                });
-            }
-            // Tạo range mới
-            const range = `TrangBom!B${rowIndex}:H${rowIndex}`;
-            console.log("=== Update Details ===");
-            console.log("Range being used:", range);
-            console.log("Number of values:", values.length);
-            console.log("Values to be written:", values);
-            // Tạo request body
-            const requestBody = {
-                spreadsheetId: sheetId,
-                range: range,
-                valueInputOption: "USER_ENTERED",
-                requestBody: {
-                    values: [values],
-                    majorDimension: "ROWS"
-                }
-            };
-            console.log("Full update request:", JSON.stringify(requestBody, null, 2));
-            // Thực hiện update
-            sheets.spreadsheets.values
-                .update(requestBody)
-                .then((response) => {
-                console.log("Update successful. Response:", response.data);
-                res.json({
-                    message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets`,
-                    details: {
-                        range: range,
-                        values: values,
-                        response: response.data
-                    }
-                });
-            })
-                .catch((error) => {
-                var _a;
-                console.error("Google Sheets API Error:", {
-                    message: error.message,
-                    code: error.code,
-                    status: error.status,
-                    errors: error.errors,
-                    stack: error.stack,
-                    requestRange: range,
-                    requestValues: values,
-                    requestBody: requestBody
-                });
-                res.status(500).json({
-                    message: "Lỗi khi cập nhật Google Sheets",
-                    details: {
-                        error: error.message,
-                        code: error.code,
-                        status: error.status,
-                        range: range,
-                        valuesCount: values.length,
-                        requestUrl: (_a = error.config) === null || _a === void 0 ? void 0 : _a.url
-                    }
-                });
-            });
+        const { rowIndex, values } = req.body;
+        if (!values || !Array.isArray(values) || rowIndex < 6) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
         }
-        catch (error) {
-            console.error("Unexpected error in /trangbom/write:", {
-                message: error.message,
-                stack: error.stack
-            });
-            res.status(500).json({
-                message: "Lỗi không xác định",
-                details: {
-                    error: error.message
-                }
-            });
+        const range = `TrangBom!B${rowIndex}:H${rowIndex}`;
+        // Promise .then() và .catch() thay vì async/await
+        sheets.spreadsheets.values
+            .update({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            requestBody: { values: [values] },
+        })
+            .then(() => {
+            res.json({ message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets` });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /trangbom/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào TrangBom (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/trangbom/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
         }
+        const range = "TrangBom!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào TrangBom", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
+        });
     });
     // Sóng Thần 
     /**
@@ -379,6 +341,54 @@ try {
             .catch((error) => {
             console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
             res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /songthan/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào SongThan (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/songthan/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "SongThan!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào SongThan", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
         });
     });
     // Diêu Trì
@@ -479,6 +489,54 @@ try {
             res.status(500).json({ message: "Lỗi server" });
         });
     });
+    /**
+     * @swagger
+     * /dieutri/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào DieuTri (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/dieutri/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "DieuTri!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào DieuTri", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
+        });
+    });
     // Đà Nẵng 
     /**
      * @swagger
@@ -575,6 +633,54 @@ try {
             .catch((error) => {
             console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
             res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /danang/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào DaNang (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/danang/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "DaNang!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào DaNang", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
         });
     });
     // Kim Liên
@@ -675,6 +781,54 @@ try {
             res.status(500).json({ message: "Lỗi server" });
         });
     });
+    /**
+     * @swagger
+     * /kimlien/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào KimLien (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/kimlien/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "KimLien!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào KimLien", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
+        });
+    });
     // Đông Anh 
     /**
      * @swagger
@@ -773,6 +927,54 @@ try {
             res.status(500).json({ message: "Lỗi server" });
         });
     });
+    /**
+     * @swagger
+     * /donganh/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào DongAnh (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/donganh/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "DongAnh!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào DongAnh", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
+        });
+    });
     // Giáp Bát
     /**
      * @swagger
@@ -869,6 +1071,54 @@ try {
             .catch((error) => {
             console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
             res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /giapbat/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào GiapBat (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/giapbat/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "GiapBat!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào GiapBat", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
         });
     });
     // Vinh
@@ -1049,6 +1299,54 @@ try {
                 }
             });
         }
+    });
+    /**
+     * @swagger
+     * /vinh/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào Vinh (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/vinh/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "Vinh!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào Vinh", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
+        });
     });
 }
 catch (error) {
