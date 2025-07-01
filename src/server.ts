@@ -136,7 +136,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/trangbom", (req: Request, res: Response) => {
-    const range = "TrangBom!A5:P8";
+    const range = "TrangBom!A5:P";
 
     sheets.spreadsheets.values
       .get({
@@ -194,7 +194,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `TrangBom!B${rowIndex}:H${rowIndex}`;
+    const range = `TrangBom!B${rowIndex}:P${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -290,7 +290,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/songthan", (req: Request, res: Response) => {
-    const range = "SongThan!A5:P8";
+    const range = "SongThan!A5:P";
 
     sheets.spreadsheets.values
       .get({
@@ -348,7 +348,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `SongThan!B${rowIndex}:H${rowIndex}`;
+    const range = `SongThan!B${rowIndex}:P${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -446,7 +446,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/dieutri", (req: Request, res: Response) => {
-    const range = "DieuTri!A5:P8";
+    const range = "DieuTri!A5:P";
 
     sheets.spreadsheets.values
       .get({
@@ -504,7 +504,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `DieuTri!B${rowIndex}:H${rowIndex}`;
+    const range = `DieuTri!B${rowIndex}:P${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -601,7 +601,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/danang", (req: Request, res: Response) => {
-    const range = "DaNang!A5:P8";
+    const range = "DaNang!A5:P";
 
     sheets.spreadsheets.values
       .get({
@@ -659,7 +659,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `DaNang!B${rowIndex}:H${rowIndex}`;
+    const range = `DaNang!B${rowIndex}:P${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -757,7 +757,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/kimlien", (req: Request, res: Response) => {
-    const range = "KimLien!A5:P8";
+    const range = "KimLien!A5:P";
 
     sheets.spreadsheets.values
       .get({
@@ -815,7 +815,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `KimLien!B${rowIndex}:H${rowIndex}`;
+    const range = `KimLien!B${rowIndex}:P${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -913,7 +913,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/donganh", (req: Request, res: Response) => {
-    const range = "DongAnh!A5:P8";
+    const range = "DongAnh!A5:P";
 
     sheets.spreadsheets.values
       .get({
@@ -971,7 +971,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `DongAnh!B${rowIndex}:H${rowIndex}`;
+    const range = `DongAnh!B${rowIndex}:P${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -1069,7 +1069,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/giapbat", (req: Request, res: Response) => {
-    const range = "GiapBat!A5:P8";
+    const range = "GiapBat!A5:P";
 
     sheets.spreadsheets.values
       .get({
@@ -1127,7 +1127,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `GiapBat!B${rowIndex}:H${rowIndex}`;
+    const range = `GiapBat!B${rowIndex}:P${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -1225,7 +1225,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/vinh", (req: Request, res: Response) => {
-    const range = "Vinh!A5:P8";
+    const range = "Vinh!A5:P";
 
     sheets.spreadsheets.values
       .get({
@@ -1278,61 +1278,8 @@ try {
    */
   app.post("/vinh/write", (req: any, res: any) => {
     try {
-        console.log("=== /vinh/write endpoint called ===");
-        console.log("Full request URL:", req.originalUrl);
-        console.log("Request body:", JSON.stringify(req.body, null, 2));
-        console.log("Sheet ID:", sheetId);
-        
         const { rowIndex, values } = req.body;
-        
-        if (!rowIndex || !values) {
-            console.log("Missing required fields:", { rowIndex, hasValues: !!values });
-            return res.status(400).json({ 
-                message: "Thiếu dữ liệu bắt buộc",
-                details: { rowIndex, hasValues: !!values }
-            });
-        }
-
-        if (!Array.isArray(values)) {
-            console.log("Values is not an array:", typeof values);
-            return res.status(400).json({ 
-                message: "Values phải là một mảng",
-                details: { type: typeof values }
-            });
-        }
-
-        if (rowIndex < 6) {
-            console.log("Invalid rowIndex:", rowIndex);
-            return res.status(400).json({ 
-                message: "rowIndex phải >= 6",
-                details: { rowIndex }
-            });
-        }
-
-        if (values.length !== 7) {
-            console.log("Invalid values length:", values.length);
-            return res.status(400).json({ 
-                message: "Cần đúng 7 giá trị cho các cột B đến H",
-                details: { 
-                    expected: 7,
-                    received: values.length,
-                    values: values
-                }
-            });
-        }
-
-        const range = `Vinh!B${rowIndex}:H${rowIndex}`;
-        console.log("=== Update Details ===");
-        console.log("Range being used:", range);
-        console.log("Number of values:", values.length);
-        console.log("Values to be written:", values);
-        console.log("Full update request:", {
-            spreadsheetId: sheetId,
-            range: range,
-            valueInputOption: "USER_ENTERED",
-            requestBody: { values: [values] }
-        });
-
+        const range = `Vinh!B${rowIndex}:P${rowIndex}`;
         sheets.spreadsheets.values
             .update({
                 spreadsheetId: sheetId,
