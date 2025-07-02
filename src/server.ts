@@ -11,9 +11,22 @@ dotenv.config();
 const app: Application = express();
 const PORT: number = Number(process.env.PORT) || 3000;
 
+const allowedOrigins = [
+  'http://localhost:4200',
+  'https://chutrung.netlify.app',
+  'https://becuachutrung.onrender.com',
+];
+
 // Cấu hình CORS chi tiết
 app.use(cors({
-  origin: '*', // Cho phép tất cả các domain trong môi trường development
+  origin: function (origin, callback) {
+    // Cho phép request không có origin (ví dụ: Postman) hoặc nằm trong danh sách
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
