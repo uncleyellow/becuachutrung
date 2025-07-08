@@ -1309,6 +1309,432 @@ try {
             res.status(500).json({ message: "Lỗi server", details: error.message });
         });
     });
+    // Quảng Ngãi
+    /**
+     * @swagger
+     * /quangngai:
+     *   get:
+     *     summary: Lấy dữ liệu từ Google Sheets (QuangNgai)
+     *     tags:
+     *       - Google Sheets
+     *     responses:
+     *       200:
+     *         description: Dữ liệu lấy thành công
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 data:
+     *                   type: array
+     *                   items:
+     *                     type: array
+     *                     items:
+     *                       type: string
+     *       404:
+     *         description: Không tìm thấy dữ liệu
+     *       500:
+     *         description: Lỗi server
+     */
+    app.get("/quangngai", (req, res) => {
+        const range = "QuangNgai!A5:P";
+        sheets.spreadsheets.values
+            .get({ spreadsheetId: sheetId, range })
+            .then((response) => {
+            const rows = response.data.values;
+            if (!rows) {
+                return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
+            }
+            res.json({ data: rows });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi lấy dữ liệu từ Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /quangngai/write:
+     *   post:
+     *     summary: Ghi dữ liệu vào Google Sheets (QuangNgai)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               rowIndex:
+     *                 type: integer
+     *                 example: 6
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["2025-03-31T12:00", "2025-03-31T14:00", "120 phút"]
+     *     responses:
+     *       200:
+     *         description: Dữ liệu đã được ghi vào Google Sheets
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/quangngai/write", (req, res) => {
+        const { rowIndex, values } = req.body;
+        if (!values || !Array.isArray(values) || rowIndex < 6) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+        }
+        const range = `QuangNgai!B${rowIndex}:P${rowIndex}`;
+        sheets.spreadsheets.values
+            .update({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            requestBody: { values: [values] },
+        })
+            .then(() => {
+            res.json({ message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets` });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /quangngai/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào QuangNgai (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/quangngai/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "QuangNgai!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào QuangNgai", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
+        });
+    });
+    // Nha Trang
+    /**
+     * @swagger
+     * /nhatrang:
+     *   get:
+     *     summary: Lấy dữ liệu từ Google Sheets (NhaTrang)
+     *     tags:
+     *       - Google Sheets
+     *     responses:
+     *       200:
+     *         description: Dữ liệu lấy thành công
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 data:
+     *                   type: array
+     *                   items:
+     *                     type: array
+     *                     items:
+     *                       type: string
+     *       404:
+     *         description: Không tìm thấy dữ liệu
+     *       500:
+     *         description: Lỗi server
+     */
+    app.get("/nhatrang", (req, res) => {
+        const range = "NhaTrang!A5:P";
+        sheets.spreadsheets.values
+            .get({ spreadsheetId: sheetId, range })
+            .then((response) => {
+            const rows = response.data.values;
+            if (!rows) {
+                return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
+            }
+            res.json({ data: rows });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi lấy dữ liệu từ Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /nhatrang/write:
+     *   post:
+     *     summary: Ghi dữ liệu vào Google Sheets (NhaTrang)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               rowIndex:
+     *                 type: integer
+     *                 example: 6
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["2025-03-31T12:00", "2025-03-31T14:00", "120 phút"]
+     *     responses:
+     *       200:
+     *         description: Dữ liệu đã được ghi vào Google Sheets
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/nhatrang/write", (req, res) => {
+        const { rowIndex, values } = req.body;
+        if (!values || !Array.isArray(values) || rowIndex < 6) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+        }
+        const range = `NhaTrang!B${rowIndex}:P${rowIndex}`;
+        sheets.spreadsheets.values
+            .update({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            requestBody: { values: [values] },
+        })
+            .then(() => {
+            res.json({ message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets` });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /nhatrang/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào NhaTrang (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/nhatrang/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "NhaTrang!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào NhaTrang", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
+        });
+    });
+    // Bình Thuận
+    /**
+     * @swagger
+     * /binhthuan:
+     *   get:
+     *     summary: Lấy dữ liệu từ Google Sheets (BinhThuan)
+     *     tags:
+     *       - Google Sheets
+     *     responses:
+     *       200:
+     *         description: Dữ liệu lấy thành công
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 data:
+     *                   type: array
+     *                   items:
+     *                     type: array
+     *                     items:
+     *                       type: string
+     *       404:
+     *         description: Không tìm thấy dữ liệu
+     *       500:
+     *         description: Lỗi server
+     */
+    app.get("/binhthuan", (req, res) => {
+        const range = "BinhThuan!A5:P";
+        sheets.spreadsheets.values
+            .get({ spreadsheetId: sheetId, range })
+            .then((response) => {
+            const rows = response.data.values;
+            if (!rows) {
+                return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
+            }
+            res.json({ data: rows });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi lấy dữ liệu từ Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /binhthuan/write:
+     *   post:
+     *     summary: Ghi dữ liệu vào Google Sheets (BinhThuan)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               rowIndex:
+     *                 type: integer
+     *                 example: 6
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["2025-03-31T12:00", "2025-03-31T14:00", "120 phút"]
+     *     responses:
+     *       200:
+     *         description: Dữ liệu đã được ghi vào Google Sheets
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/binhthuan/write", (req, res) => {
+        const { rowIndex, values } = req.body;
+        if (!values || !Array.isArray(values) || rowIndex < 6) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+        }
+        const range = `BinhThuan!B${rowIndex}:P${rowIndex}`;
+        sheets.spreadsheets.values
+            .update({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            requestBody: { values: [values] },
+        })
+            .then(() => {
+            res.json({ message: `Đã cập nhật hàng ${rowIndex} trong Google Sheets` });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi ghi dữ liệu vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server" });
+        });
+    });
+    /**
+     * @swagger
+     * /binhthuan/add:
+     *   post:
+     *     summary: Thêm bản ghi mới vào BinhThuan (cột B đến P)
+     *     tags:
+     *       - Google Sheets
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               values:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                 example: ["giá trị B", "giá trị C", ..., "giá trị P"]
+     *     responses:
+     *       200:
+     *         description: Đã thêm bản ghi mới
+     *       400:
+     *         description: Dữ liệu không hợp lệ
+     *       500:
+     *         description: Lỗi server
+     */
+    app.post("/binhthuan/add", (req, res) => {
+        const { values } = req.body;
+        if (!values || !Array.isArray(values) || values.length !== 15) {
+            return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+        }
+        const range = "BinhThuan!B:P";
+        sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: range,
+            valueInputOption: "USER_ENTERED",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [values] }
+        })
+            .then((response) => {
+            res.json({ message: "Đã thêm bản ghi mới vào BinhThuan", details: response.data });
+        })
+            .catch((error) => {
+            console.error("Lỗi khi thêm bản ghi vào Google Sheets:", error);
+            res.status(500).json({ message: "Lỗi server", details: error.message });
+        });
+    });
 }
 catch (error) {
     console.error("LỖI: Không thể đọc file credential.json:", error);
