@@ -19,14 +19,9 @@ const allowedOrigins = [
 
 // Cấu hình CORS chi tiết
 app.use(cors({
-  origin: function (origin, callback) {
-    // Cho phép request không có origin (ví dụ: Postman) hoặc nằm trong danh sách
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [ 'http://localhost:4200',
+    'https://chutrung.netlify.app',
+    'https://becuachutrung.onrender.com',],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
