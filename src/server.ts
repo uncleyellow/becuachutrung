@@ -20,7 +20,7 @@ const allowedOrigins = [
 // Cấu hình CORS chi tiết
 app.use(cors({
   origin: [ 'http://localhost:4200',
-    'https://chutrung.netlify.app',
+    'https://thongkegiotau.netlify.app',
     'https://becuachutrung.onrender.com',],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
