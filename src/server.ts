@@ -13,7 +13,7 @@ const PORT: number = Number(process.env.PORT) || 3000;
 
 const allowedOrigins = [
   'http://localhost:4200',
-  'https://chutrung.netlify.app',
+  'https://thongkegiotau.netlify.app',
   'https://becuachutrung.onrender.com',
 ];
 

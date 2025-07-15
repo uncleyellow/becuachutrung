@@ -16,7 +16,7 @@ const app = (0, express_1.default)();
 const PORT = Number(process.env.PORT) || 3000;
 const allowedOrigins = [
     'http://localhost:4200',
-    'https://chutrung.netlify.app',
+    'https://thongkegiotau.netlify.app',
     'https://becuachutrung.onrender.com',
 ];
 // Cấu hình CORS chi tiết
