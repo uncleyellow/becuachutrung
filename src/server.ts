@@ -144,7 +144,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/trangbom", (req: Request, res: Response) => {
-    const range = "TrangBom!A5:P";
+    const range = "TrangBom!A5:R";
 
     sheets.spreadsheets.values
       .get({
@@ -202,7 +202,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `TrangBom!B${rowIndex}:P${rowIndex}`;
+    const range = `TrangBom!B${rowIndex}:K${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -253,7 +253,7 @@ try {
     if (!values || !Array.isArray(values) || values.length !== 15) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
     }
-    const range = "TrangBom!B:P";
+    const range = "TrangBom!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
