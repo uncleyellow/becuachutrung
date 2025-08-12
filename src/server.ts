@@ -198,9 +198,9 @@ try {
   app.post("/trangbom/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
 
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
 
     const range = `TrangBom!B${rowIndex}:K${rowIndex}`;
 
@@ -250,9 +250,9 @@ try {
    */
   app.post("/trangbom/add", (req: any, res: any) => {
     const { values } = req.body;
-    if (!values || !Array.isArray(values) || values.length !== 15) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
-    }
+    // if (!values || !Array.isArray(values) || values.length !== 15) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+    // }
     const range = "TrangBom!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
@@ -352,9 +352,9 @@ try {
   app.post("/songthan/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
 
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
 
     const range = `SongThan!B${rowIndex}:K${rowIndex}`;
 
@@ -508,9 +508,9 @@ try {
   app.post("/dieutri/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
 
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
 
     const range = `DieuTri!B${rowIndex}:K${rowIndex}`;
 
@@ -663,9 +663,9 @@ try {
   app.post("/danang/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
 
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
 
     const range = `DaNang!B${rowIndex}:K${rowIndex}`;
 
@@ -819,9 +819,9 @@ try {
   app.post("/kimlien/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
 
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
 
     const range = `KimLien!B${rowIndex}:K${rowIndex}`;
 
@@ -975,9 +975,9 @@ try {
   app.post("/donganh/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
 
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
 
     const range = `DongAnh!B${rowIndex}:K${rowIndex}`;
 
@@ -1131,9 +1131,9 @@ try {
   app.post("/giapbat/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
 
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
 
     const range = `GiapBat!B${rowIndex}:K${rowIndex}`;
 
@@ -1466,9 +1466,9 @@ try {
    */
   app.post("/quangngai/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
     const range = `QuangNgai!B${rowIndex}:K${rowIndex}`;
     sheets.spreadsheets.values
       .update({
@@ -1611,9 +1611,9 @@ try {
    */
   app.post("/nhatrang/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
     const range = `NhaTrang!B${rowIndex}:K${rowIndex}`;
     sheets.spreadsheets.values
       .update({
@@ -1756,9 +1756,9 @@ try {
    */
   app.post("/binhthuan/write", (req: any, res: any) => {
     const { rowIndex, values } = req.body;
-    if (!values || !Array.isArray(values) || rowIndex < 6) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
-    }
+    // if (!values || !Array.isArray(values) || rowIndex < 6) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+    // }
     const range = `BinhThuan!B${rowIndex}:K${rowIndex}`;
     sheets.spreadsheets.values
       .update({
