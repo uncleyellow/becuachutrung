@@ -298,7 +298,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/songthan", (req: Request, res: Response) => {
-    const range = "SongThan!A5:P";
+    const range = "SongThan!A5:R";
 
     sheets.spreadsheets.values
       .get({
@@ -356,7 +356,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `SongThan!B${rowIndex}:P${rowIndex}`;
+    const range = `SongThan!B${rowIndex}:K${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -405,9 +405,9 @@ try {
   app.post("/songthan/add", (req: any, res: any) => {
     const { values } = req.body;
     if (!values || !Array.isArray(values) || values.length !== 15) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+      return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến K" });
     }
-    const range = "SongThan!B:P";
+    const range = "SongThan!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
@@ -454,7 +454,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/dieutri", (req: Request, res: Response) => {
-    const range = "DieuTri!A5:P";
+    const range = "DieuTri!A5:R";
 
     sheets.spreadsheets.values
       .get({
@@ -512,7 +512,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `DieuTri!B${rowIndex}:P${rowIndex}`;
+    const range = `DieuTri!B${rowIndex}:K${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -563,7 +563,7 @@ try {
     if (!values || !Array.isArray(values) || values.length !== 15) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
     }
-    const range = "DieuTri!B:P";
+    const range = "DieuTri!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
@@ -609,7 +609,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/danang", (req: Request, res: Response) => {
-    const range = "DaNang!A5:P";
+    const range = "DaNang!A5:R";
 
     sheets.spreadsheets.values
       .get({
@@ -667,7 +667,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `DaNang!B${rowIndex}:P${rowIndex}`;
+    const range = `DaNang!B${rowIndex}:K${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -715,10 +715,10 @@ try {
    */
   app.post("/danang/add", (req: any, res: any) => {
     const { values } = req.body;
-    if (!values || !Array.isArray(values) || values.length !== 15) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
-    }
-    const range = "DaNang!B:P";
+    // if (!values || !Array.isArray(values) || values.length !== 15) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+    // }
+    const range = "DaNang!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
@@ -765,7 +765,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/kimlien", (req: Request, res: Response) => {
-    const range = "KimLien!A5:P";
+    const range = "KimLien!A5:R";
 
     sheets.spreadsheets.values
       .get({
@@ -823,7 +823,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `KimLien!B${rowIndex}:P${rowIndex}`;
+    const range = `KimLien!B${rowIndex}:K${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -874,7 +874,7 @@ try {
     if (!values || !Array.isArray(values) || values.length !== 15) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
     }
-    const range = "KimLien!B:P";
+    const range = "KimLien!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
@@ -921,7 +921,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/donganh", (req: Request, res: Response) => {
-    const range = "DongAnh!A5:P";
+    const range = "DongAnh!A5:R";
 
     sheets.spreadsheets.values
       .get({
@@ -979,7 +979,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `DongAnh!B${rowIndex}:P${rowIndex}`;
+    const range = `DongAnh!B${rowIndex}:K${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -1030,7 +1030,7 @@ try {
     if (!values || !Array.isArray(values) || values.length !== 15) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
     }
-    const range = "DongAnh!B:P";
+    const range = "DongAnh!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
@@ -1077,7 +1077,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/giapbat", (req: Request, res: Response) => {
-    const range = "GiapBat!A5:P";
+    const range = "GiapBat!A5:R";
 
     sheets.spreadsheets.values
       .get({
@@ -1135,7 +1135,7 @@ try {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
 
-    const range = `GiapBat!B${rowIndex}:P${rowIndex}`;
+    const range = `GiapBat!B${rowIndex}:K${rowIndex}`;
 
     // Promise .then() và .catch() thay vì async/await
     sheets.spreadsheets.values
@@ -1184,10 +1184,10 @@ try {
    */
   app.post("/giapbat/add", (req: any, res: any) => {
     const { values } = req.body;
-    if (!values || !Array.isArray(values) || values.length !== 15) {
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
-    }
-    const range = "GiapBat!B:P";
+    // if (!values || !Array.isArray(values) || values.length !== 15) {
+    //   return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
+    // }
+    const range = "GiapBat!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
@@ -1233,7 +1233,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/vinh", (req: Request, res: Response) => {
-    const range = "Vinh!A5:P";
+    const range = "Vinh!A5:R";
 
     sheets.spreadsheets.values
       .get({
@@ -1287,7 +1287,7 @@ try {
   app.post("/vinh/write", (req: any, res: any) => {
     try {
         const { rowIndex, values } = req.body;
-        const range = `Vinh!B${rowIndex}:P${rowIndex}`;
+        const range = `Vinh!B${rowIndex}:K${rowIndex}`;
         sheets.spreadsheets.values
             .update({
                 spreadsheetId: sheetId,
@@ -1373,7 +1373,7 @@ try {
     if (!values || !Array.isArray(values) || values.length !== 15) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
     }
-    const range = "Vinh!B:P";
+    const range = "Vinh!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
@@ -1418,7 +1418,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/quangngai", (req: Request, res: Response) => {
-    const range = "QuangNgai!A5:P";
+    const range = "QuangNgai!A5:R";
     sheets.spreadsheets.values
       .get({ spreadsheetId: sheetId, range })
       .then((response) => {
@@ -1469,7 +1469,7 @@ try {
     if (!values || !Array.isArray(values) || rowIndex < 6) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
-    const range = `QuangNgai!B${rowIndex}:P${rowIndex}`;
+    const range = `QuangNgai!B${rowIndex}:K${rowIndex}`;
     sheets.spreadsheets.values
       .update({
         spreadsheetId: sheetId,
@@ -1518,7 +1518,7 @@ try {
     if (!values || !Array.isArray(values) || values.length !== 15) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
     }
-    const range = "QuangNgai!B:P";
+    const range = "QuangNgai!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
@@ -1563,7 +1563,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/nhatrang", (req: Request, res: Response) => {
-    const range = "NhaTrang!A5:P";
+    const range = "NhaTrang!A5:R";
     sheets.spreadsheets.values
       .get({ spreadsheetId: sheetId, range })
       .then((response) => {
@@ -1614,7 +1614,7 @@ try {
     if (!values || !Array.isArray(values) || rowIndex < 6) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
-    const range = `NhaTrang!B${rowIndex}:P${rowIndex}`;
+    const range = `NhaTrang!B${rowIndex}:K${rowIndex}`;
     sheets.spreadsheets.values
       .update({
         spreadsheetId: sheetId,
@@ -1663,7 +1663,7 @@ try {
     if (!values || !Array.isArray(values) || values.length !== 15) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
     }
-    const range = "NhaTrang!B:P";
+    const range = "NhaTrang!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
@@ -1708,7 +1708,7 @@ try {
    *         description: Lỗi server
    */
   app.get("/binhthuan", (req: Request, res: Response) => {
-    const range = "BinhThuan!A5:P";
+    const range = "BinhThuan!A5:R";
     sheets.spreadsheets.values
       .get({ spreadsheetId: sheetId, range })
       .then((response) => {
@@ -1759,7 +1759,7 @@ try {
     if (!values || !Array.isArray(values) || rowIndex < 6) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
     }
-    const range = `BinhThuan!B${rowIndex}:P${rowIndex}`;
+    const range = `BinhThuan!B${rowIndex}:K${rowIndex}`;
     sheets.spreadsheets.values
       .update({
         spreadsheetId: sheetId,
@@ -1808,7 +1808,7 @@ try {
     if (!values || !Array.isArray(values) || values.length !== 15) {
       return res.status(400).json({ message: "Dữ liệu không hợp lệ, cần đúng 15 giá trị cho các cột B đến P" });
     }
-    const range = "BinhThuan!B:P";
+    const range = "BinhThuan!B:K";
     sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: range,
